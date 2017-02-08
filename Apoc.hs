@@ -130,3 +130,80 @@ replace xs n elem = let (ys,zs) = splitAt n xs
 replace2        :: [[a]] -> (Int,Int) -> a -> [[a]]
 replace2 xs (x,y) elem = replace xs y (replace (xs !! y) x elem)
 
+---------------------functions----------------------------
+-------------------------------------------------------------------
+-- 0? no one won, 1? White won, 2? Black won
+checkGameOver :: GameState -> Int
+checkGameOver g
+    | countPieceBoard (theBoard g) WP == 0 && countPieceBoard (theBoard g) BP == 0 = 0
+    | countPieceBoard (theBoard g) WP == 0 = 2
+    | countPieceBoard (theBoard g) BP == 0 = 1
+    | noMovesLeft (theBoard g) == True = 0
+    | otherwise = 0
+    
+    
+-----------------------Returns whether or not there are any permissible moves left in the board
+noMovesLeft :: Board -> Bool
+noMovesLeft b
+    | hasMoves b White == False && hasMoves b Black == False = True
+    | otherwise = False
+    
+hasMoves :: Board -> Player -> Bool
+hasMoves b White = False
+hasMoves b Black = False
+-----------------------Are there [certain piece] left? Returns the number of said piece -----------
+countPieceBoard :: Board -> Cell -> Int
+countPieceBoard [] _ = 0
+countPieceBoard (r:rs) t = countPieceRow r t + countPieceBoard rs t
+
+countPieceRow :: [Cell] -> Cell -> Int
+countPieceRow [] _ = 0
+countPieceRow (c:cs) t
+    | c == t = 1 + countPieceRow cs t
+    | otherwise = 0 + countPieceRow cs t
+    
+---- given a cell, whether or not it can eat something, if it can, returns the cell it can eat 
+--canEatSomething
+    -- | 
+
+--handles all pawn placement logic and implementation for a given player
+handlePromotionAndPawnPlacement ::  GameState -> Player -> GameState
+handlePromotionAndPawnPlacement g White
+    | hasPawnReachedEnd g White == False = g
+    | canPromote g White == True = promotePawn g White
+    | otherwise = placePawn g White
+handlePromotionAndPawnPlacement g Black
+    | hasPawnReachedEnd g Black == False = g
+    | canPromote g Black == True = promotePawn g Black
+    | otherwise = placePawn g Black
+    
+hasPawnReachedEnd :: GameState -> Player -> Bool
+hasPawnReachedEnd g White
+    | countPieceRow (last (theBoard g)) WP == 0 = False
+    | otherwise = True
+hasPawnReachedEnd g Black
+    | countPieceRow (head (theBoard g)) BP == 0 = False
+    | otherwise = True
+    
+canPromote :: GameState -> Player -> Bool
+canPromote g White
+    | countPieceBoard (theBoard g) WK < 2 = True
+    | otherwise = False
+canPromote g Black
+    | countPieceBoard (theBoard g) BK < 2 = True
+    | otherwise = False
+    
+promotePawn :: GameState -> Player -> GameState
+promotePawn g White = initBoard-- We know how to get the (Int, Int) of the knight but how to replace it in the board?
+promotePawn g Black = initBoard-- ^
+
+placePawn :: GameState -> Player -> GameState
+placePawn _ _ = initBoard -- We know how to get the (Int, Int), easy to check for invalid placement, but how to replace and return board?
+    
+getPieceRow :: [Cell] -> Cell -> Int
+getPieceRow [] _ = 0
+getPieceRow (c:cs) t
+    | c == t = 0
+    | otherwise = 1 + getPieceRow cs t
+----
+
